@@ -3,20 +3,24 @@
 
 ## About
 
-This plugin was built as a adapted version of the original AMD FSR 1.0 plugin for UE4 to properly work in Unreal Engine 5.  
+This plugin was built as a adapted version of the original AMD FSR 1.0 plugin for UE4 to properly work in Unreal Engine 5.
 
-**This plugin will be deprecated when AMD launch a official version.**
+**Supports:**
 
-## Links
+* DirectX 12.
+* DirectX 11.
+* Vulkan.
 
-**AMD GPU Open Documentation:** https://gpuopen.com/learn/ue4-fsr/
+**Links:**
+
+* AMD GPU Open Documentation: https://gpuopen.com/learn/ue4-fsr/
 
 -----------------------
 
 # AMD FidelityFX Super Resolution 2.0
 AMD has released the new FSR version which supports:
-* DirectX® 12.
-* Vulkan®. 
+* DirectX 12.
+* Vulkan. 
 * Unreal Engine 4.26/4.27 and Unreal Engine 5 as a plugin from the Unreal Marketplace.
 
 Please check it out at [GPU Open](https://gpuopen.com/fidelityfx-superresolution-2/) and/or [Unreal Engine Marketplace](https://marketplace-website-node-launcher-prod.ol.epicgames.com/ue/marketplace/en-US/product/fidelityfx-super-resolution-2)!
