@@ -23,4 +23,4 @@ AMD has released the new FSR version which supports:
 * Vulkan. 
 * Unreal Engine 4.26/4.27 and Unreal Engine 5 as a plugin from the Unreal Marketplace.
 
-Please check it out at [GPU Open](https://gpuopen.com/fidelityfx-superresolution-2/) and/or [Unreal Engine Marketplace](https://marketplace-website-node-launcher-prod.ol.epicgames.com/ue/marketplace/en-US/product/fidelityfx-super-resolution-2)!
+Check it out at [GPU Open](https://gpuopen.com/fidelityfx-superresolution-2/) and/or [Unreal Engine Marketplace](https://marketplace-website-node-launcher-prod.ol.epicgames.com/ue/marketplace/en-US/product/fidelityfx-super-resolution-2)!
