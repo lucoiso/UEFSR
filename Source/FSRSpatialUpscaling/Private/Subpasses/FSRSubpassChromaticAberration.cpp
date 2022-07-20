@@ -68,7 +68,12 @@ static FVector4 GetChromaticAberrationParameters(const FPostProcessSettings& Pos
 	// this section copy-pasted from PostProcessTonemap.cpp to re-generate Color Fringe parameters ----------------
 	return ChromaticAberrationParams;
 }
+
+#if ENGINE_MAJOR_VERSION >= 5
 static void GetLensParameters(FVector4f& LensPrincipalPointOffsetScale, FVector4f& LensPrincipalPointOffsetScaleInverse, const FViewInfo& View)
+#else
+static void GetLensParameters(FVector4& LensPrincipalPointOffsetScale, FVector4& LensPrincipalPointOffsetScaleInverse, const FViewInfo& View)
+#endif
 {
 	// this section copy-pasted from PostProcessTonemap.cpp to re-generate Color Fringe parameters ----------------
 	LensPrincipalPointOffsetScale = View.LensPrincipalPointOffsetScale;
@@ -100,9 +105,17 @@ public:
 	BEGIN_SHADER_PARAMETER_STRUCT(FParameters, )
 		SHADER_PARAMETER_RDG_TEXTURE(Texture2D, ColorTexture)
 		SHADER_PARAMETER_SAMPLER(SamplerState, ColorSampler)
+
+#if ENGINE_MAJOR_VERSION >= 5
 		SHADER_PARAMETER(FVector4f, ChromaticAberrationParams)
 		SHADER_PARAMETER(FVector4f, LensPrincipalPointOffsetScale)
 		SHADER_PARAMETER(FVector4f, LensPrincipalPointOffsetScaleInverse)
+#else	
+		SHADER_PARAMETER(FVector4, ChromaticAberrationParams)
+		SHADER_PARAMETER(FVector4, LensPrincipalPointOffsetScale)
+		SHADER_PARAMETER(FVector4, LensPrincipalPointOffsetScaleInverse)
+#endif
+	
 		SHADER_PARAMETER_STRUCT_INCLUDE(FFSRPassParameters_Grain, FilmGrain)
 		SHADER_PARAMETER_STRUCT(FScreenPassTextureViewportParameters, Color)
 		RENDER_TARGET_BINDING_SLOTS()
@@ -136,9 +149,17 @@ public:
 	BEGIN_SHADER_PARAMETER_STRUCT(FParameters, )
 		SHADER_PARAMETER_RDG_TEXTURE(Texture2D, ColorTexture)
 		SHADER_PARAMETER_SAMPLER(SamplerState, ColorSampler)
+	
+#if ENGINE_MAJOR_VERSION >= 5
 		SHADER_PARAMETER(FVector4f, ChromaticAberrationParams)
 		SHADER_PARAMETER(FVector4f, LensPrincipalPointOffsetScale)
 		SHADER_PARAMETER(FVector4f, LensPrincipalPointOffsetScaleInverse)
+#else	
+		SHADER_PARAMETER(FVector4, ChromaticAberrationParams)
+		SHADER_PARAMETER(FVector4, LensPrincipalPointOffsetScale)
+		SHADER_PARAMETER(FVector4, LensPrincipalPointOffsetScaleInverse)
+#endif
+	
 		SHADER_PARAMETER_STRUCT_INCLUDE(FFSRPassParameters_Grain, FilmGrain)
 		SHADER_PARAMETER_STRUCT(FScreenPassTextureViewportParameters, Color)
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2D, OutputTexture)
@@ -220,7 +241,13 @@ void FFSRSubpassChromaticAberration::PostProcess(FRDGBuilder& GraphBuilder, cons
 			PassParameters->ColorSampler = BilinearClampSampler;
 			PassParameters->RenderTargets[0] = FRenderTargetBinding(Output.Texture, ERenderTargetLoadAction::ENoAction);
 			PassParameters->Color = GetScreenPassTextureViewportParameters(FScreenPassTextureViewport(PassParameters->ColorTexture));
+
+#if ENGINE_MAJOR_VERSION >= 5
 			PassParameters->ChromaticAberrationParams = FVector4f(GetChromaticAberrationParameters(Data->ChromaticAberrationPostProcessSettings));
+#else
+			PassParameters->ChromaticAberrationParams = GetChromaticAberrationParameters(Data->ChromaticAberrationPostProcessSettings);			
+#endif
+			
 			PassParameters->FilmGrain = Data->FilmGrainParams;
 			GetLensParameters(PassParameters->LensPrincipalPointOffsetScale, PassParameters->LensPrincipalPointOffsetScaleInverse, View);
 
@@ -253,9 +280,16 @@ void FFSRSubpassChromaticAberration::PostProcess(FRDGBuilder& GraphBuilder, cons
 			PassParameters->ColorTexture = Data->CurrentInputTexture;
 			PassParameters->ColorSampler = BilinearClampSampler;
 			PassParameters->Color = GetScreenPassTextureViewportParameters(FScreenPassTextureViewport(PassParameters->ColorTexture));
+			
+#if ENGINE_MAJOR_VERSION >= 5
 			PassParameters->ChromaticAberrationParams = FVector4f(GetChromaticAberrationParameters(Data->ChromaticAberrationPostProcessSettings));
+#else
+			PassParameters->ChromaticAberrationParams = GetChromaticAberrationParameters(Data->ChromaticAberrationPostProcessSettings);			
+#endif
+			
 			PassParameters->OutputTexture = GraphBuilder.CreateUAV(Output.Texture);
 			PassParameters->FilmGrain = Data->FilmGrainParams;
+			
 			GetLensParameters(PassParameters->LensPrincipalPointOffsetScale, PassParameters->LensPrincipalPointOffsetScaleInverse, View);
 
 			FChromaticAberrationCS::FPermutationDomain CSPermutationVector;

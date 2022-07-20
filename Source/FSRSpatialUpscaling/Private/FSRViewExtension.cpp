@@ -56,7 +56,7 @@ void FFSRViewExtension::BeginRenderViewFamily(FSceneViewFamily& InViewFamily)
 		{
 			// if we are in the full Editor, don't let the DPI-upscaler interfere with FSR
 			static auto CVarEnableEditorScreenPercentageOverride = IConsoleManager::Get().FindConsoleVariable(TEXT("Editor.OverrideDPIBasedEditorViewportScaling"));
-			
+
 			if (CVarEnableEditorScreenPercentageOverride != nullptr)
 			{
 				CVarEnableEditorScreenPercentageOverride->Set(1);				
@@ -77,8 +77,14 @@ void FFSRViewExtension::BeginRenderViewFamily(FSceneViewFamily& InViewFamily)
 
 				// TSharedPtr will clean up this allocation
 				FFSRData* Data = new FFSRData();
+				
+#if ENGINE_MAJOR_VERSION >= 5
 				Data->PostProcess_GrainIntensity = InView->FinalPostProcessSettings.GrainIntensity_DEPRECATED;
 				Data->PostProcess_GrainJitter = InView->FinalPostProcessSettings.GrainJitter_DEPRECATED;
+#else
+				Data->PostProcess_GrainIntensity = InView->FinalPostProcessSettings.GrainIntensity;
+				Data->PostProcess_GrainJitter = InView->FinalPostProcessSettings.GrainJitter;
+#endif
 				Data->PostProcess_SceneFringeIntensity = InView->FinalPostProcessSettings.SceneFringeIntensity;
 				Data->PostProcess_ChromaticAberrationStartOffset = InView->FinalPostProcessSettings.ChromaticAberrationStartOffset;
 				ViewData.Add(TSharedPtr<FFSRData>(Data));
@@ -107,8 +113,13 @@ void FFSRViewExtension::PreRenderView_RenderThread(FRHICommandListImmediate& RHI
 		if (IsFilmGrainPassEnabled())
 		{
 			// setting these values to 0 completely disables the shader permutations in PostProcessTonemap.  it doesn't just run it with no visible result.
+#if ENGINE_MAJOR_VERSION >= 5
 			InView.FinalPostProcessSettings.GrainIntensity_DEPRECATED = 0;
 			InView.FinalPostProcessSettings.GrainJitter_DEPRECATED = 0;
+#else
+			InView.FinalPostProcessSettings.GrainIntensity = 0;
+			InView.FinalPostProcessSettings.GrainJitter = 0;
+#endif
 		}
 
 		if (IsChromaticAberrationPassEnabled())

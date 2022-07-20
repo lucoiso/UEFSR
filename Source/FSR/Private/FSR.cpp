@@ -27,7 +27,9 @@
 #include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
 
-static_assert((ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 27 && ENGINE_PATCH_VERSION >= 1) || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION > 27) || ENGINE_MAJOR_VERSION >= 5, "FSR plugin requires UE4.27.1 or greater.");
+static_assert((ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 27 && ENGINE_PATCH_VERSION >= 1)
+				|| (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION > 27)
+				|| ENGINE_MAJOR_VERSION >= 5, "FSR plugin requires UE4.27.1 or greater.");
 
 IMPLEMENT_MODULE(FFSRModule, FSR)
 
@@ -56,7 +58,11 @@ void FFSRModule::StartupModule()
 
 	if (GEngine->BlueNoiseTexture == nullptr)
 	{
+#if ENGINE_MAJOR_VERSION >= 5
 		GEngine->LoadBlueNoiseTexture();
+#else
+		LoadEngineTexture(GEngine->BlueNoiseTexture, *GEngine->BlueNoiseTextureName.ToString());
+#endif
 	}
 }
 

@@ -29,7 +29,11 @@ static TAutoConsoleVariable<int32> CVarFSRPostFSRFilmGrain(
 static FFSRPassParameters_Grain GetFilmGrainParameters(const FViewInfo& View, const float GrainIntensity, const float GrainJitter)
 {
 	// this section copy-pasted from PostProcessTonemap.cpp (with modifications) to re-generate Grain Intensity parameters ----------------
+#if ENGINE_MAJOR_VERSION >= 5
 	FVector3f GrainRandomFullValue;
+#else
+	FVector GrainRandomFullValue;	
+#endif
 	{
 		uint8 FrameIndexMod8 = 0;
 		if (View.Family)
@@ -51,8 +55,15 @@ static FFSRPassParameters_Grain GetFilmGrainParameters(const FViewInfo& View, co
 	// this section copy-pasted from PostProcessTonemap.cpp (with modifications) to re-generate Grain Intensity parameters ----------------
 
 	FFSRPassParameters_Grain Parameters;
+
+#if ENGINE_MAJOR_VERSION >= 5
 	Parameters.GrainRandomFull = FVector4f(GrainRandomFullValue.X, GrainRandomFullValue.Y, 0, 0);
 	Parameters.GrainScaleBiasJitter = FVector4f(GrainScaleBiasJitter.X, GrainScaleBiasJitter.Y, GrainScaleBiasJitter.Z, 0);
+#else
+	Parameters.GrainRandomFull = FVector4(GrainRandomFullValue.X, GrainRandomFullValue.Y, 0, 0);
+	Parameters.GrainScaleBiasJitter = FVector4(GrainScaleBiasJitter, 0);
+#endif
+	
 	return Parameters;
 }
 
