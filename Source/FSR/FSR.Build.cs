@@ -74,8 +74,13 @@ public class FSR : ModuleRules
 		// To allow adjust the logic of the shaders based on the unreal engine version and this copy will occur when build the plugin
         string VersionHeaderPath = System.IO.Path.Combine(EngineDirectory, "Source", "Runtime", "Launch", "Resources", "Version.h");
         string DestinationVersionFile = System.IO.Path.Combine(ModuleDirectory, "..", "..", "Shaders", "Private", "Version.ush");
+        
         // Version.h is read only by default, we need to uncheck this attribute to allow overwrite the existing Version.ush on copy
-        System.IO.File.SetAttributes(DestinationVersionFile, System.IO.File.GetAttributes(DestinationVersionFile) & ~System.IO.FileAttributes.ReadOnly);
+        if (System.IO.File.Exists(DestinationVersionFile))
+        {
+            System.IO.File.SetAttributes(DestinationVersionFile, System.IO.File.GetAttributes(DestinationVersionFile) & ~System.IO.FileAttributes.ReadOnly);
+        }
+        
         System.IO.File.Copy(VersionHeaderPath, DestinationVersionFile, true);
     }
 }
