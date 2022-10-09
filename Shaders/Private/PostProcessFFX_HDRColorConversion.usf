@@ -19,9 +19,10 @@
 // THE SOFTWARE.
 //------------------------------------------------------------------------------
 
+#include "Version.ush"
+
 #include "/Engine/Private/Common.ush"
 #include "/Engine/Private/ScreenPass.ush"
-
 
 // =====================================================================================
 //
@@ -34,7 +35,6 @@
 #include "ffx_fsr1.ush"
 #include "PostProcessFFX_Common.ush"
 #include "/Engine/Private/BlueNoise.ush"
-
 
 #if COMPUTE_SHADER
 #ifndef FSR_OUTPUTDEVICE
@@ -71,7 +71,12 @@ AF4 ConvertHDRColorToGamma2(AU2 gxy)
 	
 		AU2 BlueNoiseTileCoord = gxy % BlueNoise.Dimensions.xy; // 256x256
 		AU1 BlueNoiseSlice = 0;
-		AF3 PerPixelGrainTex = EvalBlueNoise(BlueNoiseTileCoord, BlueNoiseSlice);
+
+		#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+			AF3 PerPixelGrainTex = BlueNoiseScalar(BlueNoiseTileCoord, BlueNoiseSlice);
+		#else
+			AF3 PerPixelGrainTex = EvalBlueNoise(BlueNoiseTileCoord, BlueNoiseSlice);
+		#endif
 		
 		// Temporally Energy Preserving Dither for 10:10:10:2_UNORM / Gamma2 storage
 		FsrTepdC10F(NormalizedLinearColor, PerPixelGrainTex.r * DitherAmount);

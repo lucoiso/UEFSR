@@ -69,5 +69,11 @@ public class FSR : ModuleRules
 		);
 
 		PrecompileForTargets = PrecompileTargetsType.Any;
-	}
+
+		// Some things changed from 4.27 to 5.0 and from 5.0 to 5.1, so we r copying the Version.h to Shaders folder as a .ush file
+		// To allow adjust the logic of the shaders based on the unreal engine version and this copy will occur when build the plugin
+        string VersionHeaderPath = System.IO.Path.Combine(EngineDirectory, "Source", "Runtime", "Launch", "Resources", "Version.h");
+        string DestinationVersionFile = System.IO.Path.Combine(ModuleDirectory, "..", "..", "Shaders", "Private", "Version.ush");
+        System.IO.File.Copy(VersionHeaderPath, DestinationVersionFile, true);
+    }
 }
