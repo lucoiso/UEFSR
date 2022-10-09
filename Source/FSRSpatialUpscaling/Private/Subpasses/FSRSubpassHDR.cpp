@@ -19,8 +19,11 @@
 // THE SOFTWARE.
 //------------------------------------------------------------------------------
 #include "FSRSubpassHDR.h"
-
 #include "BlueNoise.h"
+
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+#include "GenericPlatform/GenericPlatformMisc.h"
+#endif
 
 static float GFSR_HDR_PQDither = 1.0f;
 static FAutoConsoleVariableRef CVarFSR_HDR_PQDither(
@@ -29,6 +32,65 @@ static FAutoConsoleVariableRef CVarFSR_HDR_PQDither(
 	TEXT("[HDR-Only] DitherAmount to apply for PQ->Gamma2 conversion to eliminate color banding, when the output device is ST2084/PQ."),
 	ECVF_RenderThreadSafe);
 
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+static EFSR_OutputDevice GetFSROutputDevice(EDisplayOutputFormat UE5DisplayOutputFormat)
+{
+	EFSR_OutputDevice ColorSpace = EFSR_OutputDevice::MAX;
+
+	switch (UE5DisplayOutputFormat)
+	{
+	case EDisplayOutputFormat::SDR_sRGB:
+	case EDisplayOutputFormat::SDR_Rec709:
+	case EDisplayOutputFormat::SDR_ExplicitGammaMapping:
+		ColorSpace = EFSR_OutputDevice::sRGB;
+		break;
+	case EDisplayOutputFormat::HDR_ACES_1000nit_ST2084:
+	case EDisplayOutputFormat::HDR_ACES_2000nit_ST2084:
+		ColorSpace = EFSR_OutputDevice::PQ;
+		break;
+	case EDisplayOutputFormat::HDR_ACES_1000nit_ScRGB:
+	case EDisplayOutputFormat::HDR_ACES_2000nit_ScRGB:
+		ColorSpace = EFSR_OutputDevice::scRGB;
+		break;
+	case EDisplayOutputFormat::HDR_LinearEXR:
+	case EDisplayOutputFormat::HDR_LinearNoToneCurve:
+	case EDisplayOutputFormat::HDR_LinearWithToneCurve:
+		ColorSpace = EFSR_OutputDevice::Linear;
+		break;
+	}
+
+	return ColorSpace;
+}
+
+static EFSR_OutputDeviceMaxNits GetOutputDeviceMaxNits(EDisplayOutputFormat eFormat) // only needed for HDR color conversions
+{
+	// this will select shader variants so MAX cannot be used.
+	EFSR_OutputDeviceMaxNits eMaxNits = EFSR_OutputDeviceMaxNits::EFSR_1000Nits;  // Assume 1000 for the default case.
+
+	switch (eFormat)
+	{
+	case EDisplayOutputFormat::HDR_ACES_1000nit_ST2084:
+	case EDisplayOutputFormat::HDR_ACES_1000nit_ScRGB:
+		eMaxNits = EFSR_OutputDeviceMaxNits::EFSR_1000Nits;
+		break;
+	case EDisplayOutputFormat::HDR_ACES_2000nit_ST2084:
+	case EDisplayOutputFormat::HDR_ACES_2000nit_ScRGB:
+		eMaxNits = EFSR_OutputDeviceMaxNits::EFSR_2000Nits;
+		break;
+
+	case EDisplayOutputFormat::SDR_sRGB:
+	case EDisplayOutputFormat::SDR_Rec709:
+	case EDisplayOutputFormat::SDR_ExplicitGammaMapping:
+	case EDisplayOutputFormat::HDR_LinearEXR:
+	case EDisplayOutputFormat::HDR_LinearNoToneCurve:
+	case EDisplayOutputFormat::HDR_LinearWithToneCurve:
+	default:
+		// noop
+		break;
+	}
+	return eMaxNits;
+}
+#else
 static EFSR_OutputDevice GetFSROutputDevice(ETonemapperOutputDevice UE4TonemapperOutputDevice)
 {
 	EFSR_OutputDevice ColorSpace = EFSR_OutputDevice::MAX;
@@ -86,6 +148,7 @@ static EFSR_OutputDeviceMaxNits GetOutputDeviceMaxNits(ETonemapperOutputDevice e
 	}
 	return eMaxNits;
 }
+#endif
 
 //
 // COLOR CONVERSION COMPUTE SHADER
@@ -139,7 +202,12 @@ void FFSRSubpassHDR::ParseEnvironment(FRDGBuilder& GraphBuilder, const FViewInfo
 {
 	Data->TonemapperOutputDeviceParameters = GetTonemapperOutputDeviceParameters(*View.Family);
 
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+	const EDisplayOutputFormat eTonemapperOutputDevice = (EDisplayOutputFormat)Data->TonemapperOutputDeviceParameters.OutputDevice;
+#else
 	const ETonemapperOutputDevice eTonemapperOutputDevice = (ETonemapperOutputDevice)Data->TonemapperOutputDeviceParameters.OutputDevice;
+#endif
+	
 	Data->eOUTPUT_DEVICE = GetFSROutputDevice(eTonemapperOutputDevice);
 	Data->eMAX_NITS = GetOutputDeviceMaxNits(eTonemapperOutputDevice);
 
@@ -224,8 +292,14 @@ void FFSRSubpassHDR::Upscale(FRDGBuilder& GraphBuilder, const FViewInfo& View, c
 		FColorConversionCS::FParameters* PassParameters = GraphBuilder.AllocParameters<FColorConversionCS::FParameters>();
 		PassParameters->InputTexture = Data->CurrentInputTexture;
 		PassParameters->OutputTexture = GraphBuilder.CreateUAV(Data->ColorConvertedTexture.Texture);
+		
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+		FBlueNoise BlueNoise = GetBlueNoiseParameters();
+#else
 		FBlueNoise BlueNoise;
 		InitializeBlueNoise(BlueNoise);
+#endif
+		
 		PassParameters->BlueNoise = CreateUniformBufferImmediate(BlueNoise, EUniformBufferUsage::UniformBuffer_SingleFrame);
 		PassParameters->DitherAmount = FMath::Min(1.0f, FMath::Max(0.0f, GFSR_HDR_PQDither));
 

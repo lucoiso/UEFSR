@@ -55,8 +55,12 @@ static void LoadEngineTexture(TextureType*& InOutTexture, const TCHAR* InName)
 void FFSRModule::StartupModule()
 {
 	FSRViewExtension = FSceneViewExtensions::NewExtension<FFSRViewExtension>();
-
+	
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+	if (GEngine->BlueNoiseScalarTexture == nullptr)
+#else
 	if (GEngine->BlueNoiseTexture == nullptr)
+#endif
 	{
 #if ENGINE_MAJOR_VERSION >= 5
 		GEngine->LoadBlueNoiseTexture();
