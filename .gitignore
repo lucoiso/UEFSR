@@ -16,3 +16,4 @@ enc_temp_folder
 *.xcworkspace
 *.ipch
 *.TMP
+Shaders/Private/Version.ush
