@@ -23,6 +23,8 @@
 #include "ShaderParameterMacros.h"
 #include "Shader.h"
 
+#include "Runtime/Launch/Resources/Version.h"
+
 // ===============================================================================================================================================
 //
 // FIDELITYFX CONFIGURATION
