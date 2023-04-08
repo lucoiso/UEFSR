@@ -18,6 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //------------------------------------------------------------------------------
+
+using System;
+using System.IO;
+using System.Text;
+
 using UnrealBuildTool;
 
 public class FSR : ModuleRules
@@ -70,17 +75,33 @@ public class FSR : ModuleRules
 
 		PrecompileForTargets = PrecompileTargetsType.Any;
 
-		// Some things changed from 4.27 to 5.0 and from 5.0 to 5.1, so we r copying the Version.h to Shaders folder as a .ush file
-		// To allow adjust the logic of the shaders based on the unreal engine version and this copy will occur when build the plugin
-		string VersionHeaderPath = System.IO.Path.Combine(EngineDirectory, "Source", "Runtime", "Launch", "Resources", "Version.h");
-		string DestinationVersionFile = System.IO.Path.Combine(ModuleDirectory, "..", "..", "Shaders", "Private", "Version.ush");
+		/* ------------------------------------------ CUSTOM ------------------------------------------ */
 
-		// Version.h is read only by default, we need to uncheck this attribute to allow overwrite the existing Version.ush on copy
-		if (System.IO.File.Exists(DestinationVersionFile))
+		// Some things changed from 4.27 to 5+, so we r copying the version macros to a new .ush file
+		// To allow adjust the logic of the shaders based on the unreal engine version and this copy will occur when build the plugin
+		string VersionHeaderPath = Path.Combine(EngineDirectory, "Source", "Runtime", "Launch", "Resources", "Version.h");
+		string DestinationVersionFile = Path.Combine(ModuleDirectory, "..", "..", "Shaders", "Private", "Version.ush");
+
+		string[] FileLines = File.ReadAllLines(VersionHeaderPath);
+
+		StringBuilder StringBuilder = new StringBuilder();
+
+		StringBuilder.AppendLine("#pragma once");
+		StringBuilder.AppendLine();
+
+		foreach (string Iterator in FileLines)
 		{
-			System.IO.File.SetAttributes(DestinationVersionFile, System.IO.File.GetAttributes(DestinationVersionFile) & ~System.IO.FileAttributes.ReadOnly);
+			if (Iterator.StartsWith("#define ENGINE_"))
+			{
+				StringBuilder.AppendLine(Iterator);
+			}
+
+			if (Iterator.Contains("ENGINE_PATCH_VERSION"))
+			{
+				break;
+			}
 		}
 
-		System.IO.File.Copy(VersionHeaderPath, DestinationVersionFile, true);
+		File.WriteAllText(DestinationVersionFile, StringBuilder.ToString());
 	}
 }
