@@ -294,7 +294,12 @@ void FFSRSubpassHDR::Upscale(FRDGBuilder& GraphBuilder, const FViewInfo& View, c
 		PassParameters->OutputTexture = GraphBuilder.CreateUAV(Data->ColorConvertedTexture.Texture);
 		
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+#if ENGINE_MINOR_VERSION == 1
 		FBlueNoise BlueNoise = GetBlueNoiseParameters();
+#elif ENGINE_MINOR_VERSION >= 2
+		FBlueNoise BlueNoise;
+		BlueNoise.BlueNoise = GetBlueNoiseParameters();
+#endif
 #else
 		FBlueNoise BlueNoise;
 		InitializeBlueNoise(BlueNoise);
