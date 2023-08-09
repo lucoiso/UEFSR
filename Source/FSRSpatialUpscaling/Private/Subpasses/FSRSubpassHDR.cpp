@@ -20,6 +20,9 @@
 //------------------------------------------------------------------------------
 #include "FSRSubpassHDR.h"
 #include "BlueNoise.h"
+#if (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION > 2)
+	#include "SceneRendering.h"
+#endif
 
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
 #include "GenericPlatform/GenericPlatformMisc.h"
@@ -294,12 +297,14 @@ void FFSRSubpassHDR::Upscale(FRDGBuilder& GraphBuilder, const FViewInfo& View, c
 		PassParameters->OutputTexture = GraphBuilder.CreateUAV(Data->ColorConvertedTexture.Texture);
 		
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
-#if ENGINE_MINOR_VERSION == 1
+	#if ENGINE_MINOR_VERSION == 1
 		FBlueNoise BlueNoise = GetBlueNoiseParameters();
-#elif ENGINE_MINOR_VERSION >= 2
+	#elif ENGINE_MINOR_VERSION == 2
 		FBlueNoise BlueNoise;
 		BlueNoise.BlueNoise = GetBlueNoiseParameters();
-#endif
+	#elif ENGINE_MINOR_VERSION > 2
+		FBlueNoise BlueNoise = GetBlueNoiseGlobalParameters();
+	#endif
 #else
 		FBlueNoise BlueNoise;
 		InitializeBlueNoise(BlueNoise);

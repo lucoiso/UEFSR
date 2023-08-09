@@ -19,6 +19,9 @@
 // THE SOFTWARE.
 //------------------------------------------------------------------------------
 #include "FSRSubpassFilmGrain.h"
+#if (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION > 2)
+	#include "SceneRendering.h"
+#endif
 
 static TAutoConsoleVariable<int32> CVarFSRPostFSRFilmGrain(
 	TEXT("r.FidelityFX.FSR.Post.FilmGrain"),

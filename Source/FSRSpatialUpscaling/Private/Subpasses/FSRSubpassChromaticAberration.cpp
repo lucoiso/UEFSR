@@ -19,9 +19,10 @@
 // THE SOFTWARE.
 //------------------------------------------------------------------------------
 #include "FSRSubpassChromaticAberration.h"
-
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 2)
-#include <DataDrivenShaderPlatformInfo.h>
+#if (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION <= 2)
+	#include <DataDrivenShaderPlatformInfo.h>
+#elif (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION > 2)
+	#include "SceneRendering.h"
 #endif
 
 static TAutoConsoleVariable<int32> CVarFSRPostFSRChromaticAberration(
