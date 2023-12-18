@@ -20,6 +20,10 @@
 //------------------------------------------------------------------------------
 #include "FSRSubpassFirst.h"
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 2)
+#include <SceneRendering.h>
+#endif
+
 void FFSRSubpassFirst::CreateResources(FRDGBuilder& GraphBuilder, const FViewInfo& View, const FInputs& PassInputs)
 {
 	Data->FSROutputTextureDesc = PassInputs.SceneColor.Texture->Desc;

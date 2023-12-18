@@ -20,6 +20,11 @@
 //------------------------------------------------------------------------------
 #include "FSRSubpassEASU.h"
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 2)
+#include <DataDrivenShaderPlatformInfo.h>
+#include <SceneRendering.h>
+#endif
+
 static int32 GFSR_FP16 = 1;
 static FAutoConsoleVariableRef CVarFSRUseFP16(
 	TEXT("r.FidelityFX.FSR.UseFP16"),
