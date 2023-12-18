@@ -22,12 +22,12 @@
 #include "BlueNoise.h"
 
 #if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 2)
-#include "DataDrivenShaderPlatformInfo.h"
-#include "SceneRendering.h"
+#include <DataDrivenShaderPlatformInfo.h>
+#include <SceneRendering.h>
 #endif
 
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
-#include "GenericPlatform/GenericPlatformMisc.h"
+#include <GenericPlatform/GenericPlatformMisc.h>
 #endif
 
 static float GFSR_HDR_PQDither = 1.0f;
