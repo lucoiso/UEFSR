@@ -28,7 +28,7 @@
 #include "Subpasses/FSRSubpassChromaticAberration.h"
 #include "Subpasses/FSRSubpassLast.h"
 
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 3)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
 #include <SceneRendering.h>
 #endif
 
